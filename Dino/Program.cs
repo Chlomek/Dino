@@ -14,7 +14,7 @@ namespace Dino
             int speedDivider = 5;
             int startSpeed = 200;
             int maxSpeed = 40;
-            int score = 1110;
+            int score = 0;
             int minDistance = 10;
             int startDistance = 30;
 
