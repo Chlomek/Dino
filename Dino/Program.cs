@@ -11,27 +11,31 @@ namespace Dino
     {
         static void Main(string[] args)
         {
-            int speedMultiplier = 5;
+            int speedDivider = 5;
             int startSpeed = 200;
             int maxSpeed = 40;
-            int score = 0;
+            int score = 1110;
+            int minDistance = 10;
+            int startDistance = 30;
 
             Random rnd = new Random();
-            string[,] map = new string[3, 30];
+            string[,] map = new string[3, 25];
             int dinoX = 0;
             int dinoY = 0;
             int jump = 0;
+            int distance = startDistance;
+            int bird = rnd.Next(100,200);
             int cactusX = 40;
             int nextCactus = rnd.Next(25, 40) + cactusX;
             FillMap(map);
             while (true)
             {
-                if (maxSpeed > score/speedMultiplier)
-                    Thread.Sleep(startSpeed - score / speedMultiplier);
+                if (maxSpeed < startSpeed - score / speedDivider)
+                    Thread.Sleep(startSpeed - score / speedDivider);
                 else
                     Thread.Sleep(maxSpeed);
 
-
+                //Collision check
                 if (cactusX == dinoX && dinoY == 0)
                 {
                     Console.WriteLine("Game Over");
@@ -42,18 +46,38 @@ namespace Dino
                     Console.WriteLine("Game Over");
                     Console.ReadKey();
                 }
-
-                if (cactusX > 0)
+                else if (bird == dinoX && dinoY == 1)
                 {
-                    cactusX--;
-                    nextCactus--;
+                    Console.WriteLine("Game Over");
+                    Console.ReadKey();
                 }
-                else
+
+                cactusX--;
+                nextCactus--;
+                bird--;
+
+                //Remove and swap cactuses
+                if (cactusX == 0)
                 {
                     cactusX = nextCactus;
-                    nextCactus = rnd.Next(15, 30) + cactusX;
+                    if(minDistance < startDistance - score / speedDivider)
+                        nextCactus = rnd.Next(startDistance - score/speedDivider, startDistance * 2 - score / speedDivider) + cactusX;
+                    else
+                        nextCactus = rnd.Next(minDistance, minDistance * 2) + cactusX;
                 }
 
+                //Generate bird
+                if(bird == 0)
+                {
+                    bird = BirdMet(minDistance, startDistance, score, speedDivider, cactusX);
+                }
+
+                if (bird - nextCactus < 3 && bird - nextCactus >= 0 || nextCactus - bird < 3 && nextCactus - bird >= 0)
+                {
+                    bird = BirdMet(minDistance, startDistance, score, speedDivider, cactusX);
+                }
+
+                //Jumping
                 if (jump > 2)
                 {
                     dinoY++;
@@ -65,7 +89,7 @@ namespace Dino
                     jump--;
                 }
 
-                DrawMap(map, dinoX, dinoY, cactusX, nextCactus, score);
+                DrawMap(map, dinoX, dinoY, cactusX, nextCactus, score, bird);
 
                 if (Console.KeyAvailable)
                 {
@@ -111,7 +135,7 @@ namespace Dino
                 }
             }
         }
-        static void DrawMap(string[,] map, int dinoX, int dinoY, int CactusX, int nextCactus, int score)
+        static void DrawMap(string[,] map, int dinoX, int dinoY, int CactusX, int nextCactus, int score, int bird)
         {
             Console.Clear();
             for (int y = map.GetLength(0) - 1; y >= 0; y--)
@@ -130,6 +154,10 @@ namespace Dino
                     {
                         Console.Write("K");
                     }
+                    else if (x == bird && y == 1)
+                    {
+                        Console.Write("P");
+                    }
                     else
                     {
                         Console.Write(map[y, x]);
@@ -137,15 +165,26 @@ namespace Dino
                 }
                 Console.WriteLine();
             }
-            Testing(dinoX, dinoY, CactusX, nextCactus, score);
+            Testing(dinoX, dinoY, CactusX, nextCactus, score, bird);
         }
-        static void Testing(int dinoX, int dinoY, int CactusX, int nextCactus, int score)
+        static void Testing(int dinoX, int dinoY, int CactusX, int nextCactus, int score, int bird)
         {
+            Console.WriteLine();
             Console.WriteLine("X: " + dinoX);
             Console.WriteLine("Y: " + dinoY);
             Console.WriteLine("C: " + CactusX);
             Console.WriteLine("K: " + nextCactus);
+            Console.WriteLine("P: " + bird);
             Console.WriteLine("Score: " + score);
+        }
+        static int BirdMet(int minDistance, int startDistance, int score, int speedDivider, int cactusX)
+        {
+            Random rnd = new Random();
+
+            if (minDistance < startDistance - score / speedDivider)
+                return rnd.Next(startDistance * 5 - score / speedDivider, startDistance * 10 - score / speedDivider) + cactusX;
+            else
+                return rnd.Next(minDistance * 5, minDistance * 10);
         }
     }
 }
